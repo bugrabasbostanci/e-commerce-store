@@ -24,22 +24,30 @@ model User {
 }
 
 model Product {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   name        String
   description String
   status      ProductStatus
   price       Int
   images      String[]
   category    Category
-  isFeatured  Boolean @default(false)
+  isFeatured  Boolean       @default(false)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+model Banner {
+  id          String @id @default(uuid())
+  title       String
+  imageString String
+
+  createdAt DateTime @default(now())
 }
 
 enum ProductStatus {
- draft
- published
- archived
+  draft
+  published
+  archived
 }
 
 enum Category {
