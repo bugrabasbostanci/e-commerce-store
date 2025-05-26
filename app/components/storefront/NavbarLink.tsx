@@ -18,13 +18,18 @@ export const navLinks = [
     {
         id:2,
         name: "Men",
-        href: "/men",
+        href: "/products/men",
     },
     {
         id:3,
         name: "Women",
-        href: "/women",
+        href: "/products/women",
     },
+    {
+        id: 4,
+        name: "Kids",
+        href: "/products/kids",
+    }
 ]
 
 export function NavbarLinks() {
