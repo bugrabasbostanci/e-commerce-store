@@ -8,6 +8,8 @@ import prisma from "./lib/db";
 import { redis } from "./lib/redis";
 import { Cart } from "./lib/interfaces";
 import { revalidatePath } from "next/cache";
+import { stripe } from "./lib/stripe";
+import Stripe from "stripe";
 
 
 export async function createProduct(prevState: unknown, formData: FormData) {
@@ -194,7 +196,7 @@ export async function addItem(productId: string) {
             return item;
         })
 
-        if(!itemFound) {
+        if (!itemFound) {
             myCart.items.push({
                 id: selectedProduct.id,
                 imageString: selectedProduct.images[0],
@@ -222,7 +224,7 @@ export async function deleteItem(formData: FormData) {
 
     let cart: Cart | null = await redis.get(`cart-${user.id}`)
 
-    if(cart && cart.items) {
+    if (cart && cart.items) {
         const updateCard: Cart = {
             userId: user.id,
             items: cart.items.filter((item) => item.id !== productId)
@@ -232,4 +234,49 @@ export async function deleteItem(formData: FormData) {
     }
 
     revalidatePath("/bag");
+}
+
+export async function checkOut() {
+    const { getUser } = getKindeServerSession();
+    const user = await getUser();
+
+    if (!user) {
+        return redirect("/");
+    }
+
+    let cart: Cart | null = await redis.get(`cart-${user.id}`)
+
+    if (cart && cart.items) {
+        const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cart.items.map((item) => ({
+            price_data: {
+                currency: "usd",
+                unit_amount: item.price * 100, // Stripe expects the amount in cents
+                product_data: {
+                    name: item.name,
+                    images: [item.imageString],
+                }
+            },
+            quantity: item.quantity
+        }))
+
+        const session = await stripe.checkout.sessions.create({
+            mode: "payment",
+            line_items: lineItems,
+            success_url: "http://localhost:3000/payment/success",
+            cancel_url: "http://localhost:3000/payment/cancel",
+            metadata: {
+                userId: user.id,
+            }
+        }
+        )
+
+        return redirect(session.url as string);
+    }
+
+    // Here you would typically create a checkout session with Stripe or another payment provider
+    // For this example, we will just clear the cart and redirect to a success page
+
+    await redis.del(`cart-${user.id}`);
+
+    redirect("/checkout/success");
 }

@@ -91,7 +91,7 @@ export default async function CategoriesPage({params}: {params: {name: string}})
             <h1 className="font-semibold text-3xl my-5">{title}</h1>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {data.map((item) => (
-                    <ProductCard item={item}/>
+                    <ProductCard item={item} key={item.id}/>
                 ))}
             </div>
         </section>

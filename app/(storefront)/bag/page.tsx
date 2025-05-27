@@ -4,9 +4,9 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { deleteItem } from "@/app/actions";
-import { Delete, ShoppingBag } from "lucide-react";
-import { DeleteItem } from "@/app/components/SubmitButtons";
+import { checkOut, deleteItem } from "@/app/actions";
+import { Check, Delete, ShoppingBag } from "lucide-react";
+import { CheckoutButton, DeleteItem } from "@/app/components/SubmitButtons";
 import Link from "next/link";
 
 export default async function BagRoute() {
@@ -27,10 +27,10 @@ export default async function BagRoute() {
 
     return (
         <div className="max-w-2xl mx-auto mt-10 min-h-[55vh]">
-            {cart?.items.length === 0 ? (
+            {!cart || !cart.items ? (
                 <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center mt-20">
                     <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                        <ShoppingBag className="w-10 h-10 text-primary "/>
+                        <ShoppingBag className="w-10 h-10 text-primary " />
                     </div>
                     <h2 className="mt-6 text-xl font-semibold">You dont have any products in your Bag</h2>
                     <p className="mb-8 mt-2 text-center text-sm leading-6 text-muted-foreground max-w-sm mx-auto">You currently dont have any products in your shopping bag. Please add some so that you can see them right here.</p>
@@ -59,7 +59,7 @@ export default async function BagRoute() {
                                     </div>
 
                                     <form action={deleteItem} className="text-end">
-                                        <input type="hidden" name="productId" value={item.id}/>
+                                        <input type="hidden" name="productId" value={item.id} />
                                         <DeleteItem />
                                     </form>
                                 </div>
@@ -72,9 +72,9 @@ export default async function BagRoute() {
                             <p>${new Intl.NumberFormat('en-US').format(totalPrice)}</p>
                         </div>
 
-                        <Button size="lg" className="w-full mt-5">
-                            Checkout
-                        </Button>
+                        <form action={checkOut}>
+                            <CheckoutButton />
+                        </form>
                     </div>
                 </div>
             )}
